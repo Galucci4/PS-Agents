@@ -1,7 +1,7 @@
 # PS-Agents
 
 
-PEAS Framework for  Self Driving Agent
+PEAS Framework for  Searching Agent
 
 
 Performance Measure: Minimize fuel consumption, comfort of the passenger by their rating, shortest route taken, mnimize time taken to move form source to destination
