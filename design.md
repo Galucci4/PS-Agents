@@ -21,7 +21,7 @@ Here is a clean table with no added colours, ready to copy into Word or your Mar
 | Actuators            | Steering, engine, brakes, indicators, lights, and horn                                    | They allow the agent to act on its environment.                                             |
 | Sensors              | GPS, cameras, and speed sensors                                                           | These supply information about the trailer's surroundings.                                  |
 
-Note: Markdown tables inherit their colours from the app or editor you use. If a row appears bluish, that's usually the editor's theme, not the Markdown itself.
+
 ### 1.2 Five environment classifications
 
 | | Classification | Reasoning |
