@@ -28,7 +28,7 @@ Atiq Yaasir- 190375
 |  | Stochastic | Other drivers, traffic and weather introduce uncertain outcomes. |
 |  | Sequential | Earlier driving and routing decisions influence later states. |
 |  | Dynamic | Road users and traffic conditions change during decision-making. |
-| 
+|  | Multiagent| Other vehicles and road users pursue own goals and compete for the road space
 
 
 ## 2. Highway network: abstraction, directed graph and search tree
@@ -117,7 +117,7 @@ To determine the optimal path for the self-driving trailer from Nairobi to Kisum
 There are three main paths through the search tree:
 
 1. **Route 1 (Rift Valley via Naivasha):**
-   $$\text{Nairobi} \xrightarrow{90} \text{Naivasha} \xrightarrow{71} \text{Kericho} \xrightarrow{84} \text{Kisumu}$$
+   $$\text{Nairobi} \xrightarrow{90} \text{Naivasha} \xrightarrow{71}   \text{Nakuru} \xrightarrow{108} \text{Kericho} \xrightarrow{84} \text{Kisumu}$$
    * **Total Distance:** $90 + 71 + 84 = \mathbf{353\text{ km}}$
 
 2. **Route 2 (Central Highlands via Thika):**
@@ -131,9 +131,7 @@ There are three main paths through the search tree:
 
 ### 3.2 Algorithmic Proof via Dijkstra's Algorithm
 
-Dijkstra's algorithm maintains a shortest-distance array $d(v)$, a predecessor array $p(v)$ and an unvisited set $Q$. 
-All non-source nodes start at $d(v) = \infty$, while $d(\text{Nairobi}) = 0$.
-
+Comparing three hand-picked routes only tells us which of them is shortest. To be sure no cheaper path exists in our graph, we ran Dijkstra's algorithm, which is uniform-cost search: at each step, the agent expands the town with the smallest distance travelled so far. Think of a football team building an attack from the goalkeeper's goal kick. Instead of chasing the flashiest pass, they always work from the player the ball reached most cheaply, and only lock that player in once no faster route to them could exist. Each town carries a label d(v), the best distance found so far, and a pointer p(v), where we came from, so we can retrace the winning move at the end.
 #### Execution Trace Table
 
 | Iteration | Current Node Selected $u$ | $d(u)$ (km) | Updated Neighbors ($v$) | Tentative Distance $d(v)$ Formula                                                                          | Previous Node $p(v)$ | Unvisited Set $Q$ Remaining                                                           |
@@ -159,7 +157,7 @@ Optimal path:
 $$\mathbf{\text{Nairobi} \longrightarrow \text{Naivasha} \longrightarrow \text{Nakuru} \longrightarrow \text{Kericho} \longrightarrow \text{Kisumu}}$$
 
 * **Minimum Path Cost:** $\mathbf{353\text{ km}}$
-* **Conclusion:** Dijkstra's Algorithm affirms that the Naivasha-Nakuru-Kerischo route is optimal, saving **33 km and 167 km** compared to the 3rd and 2nd alternative routes respectively.
+* **Conclusion:** The Naivasha–Nakuru–Kericho route is optimal at 353 km. It is 33 km shorter than the Narok route (386 km) and 167 km shorter than the Thika route (520 km). This result optimises distance only. Fuel use, travel time and road conditions, which our PEAS performance measure also names, would need extra data to compare.
 
 
 ## group photo
