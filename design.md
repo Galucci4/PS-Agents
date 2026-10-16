@@ -112,9 +112,9 @@ This is the shortest route in our simplified graph. The calculation minimises di
 
 ## References
 
-- *Intelligent Agents*, class slides, pages 15 and 20-25.
-- *Problem Solving Agents*, class slides, pages 4-14.
-- [Google Maps class-map view](https://www.google.com/maps/@-0.6429168,35.8398069,9z).
+- *Intelligent Agents*, class slides.
+- *Problem Solving Agents*, class slides.
+- [Google Maps  view](https://www.google.com/maps/@-0.6429168,35.8398069,9z).
 - Google Maps driving directions, R1-R3 in the distance table.
 
 ## Group photo
