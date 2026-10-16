@@ -161,3 +161,6 @@ $$\mathbf{\text{Nairobi} \longrightarrow \text{Naivasha} \longrightarrow \text{N
 
 
 ## group photo
+<img width="940" height="349" alt="image" src="https://github.com/user-attachments/assets/bd7ee0aa-2e58-4d03-a843-08cfbdcd8552" />
+
+
