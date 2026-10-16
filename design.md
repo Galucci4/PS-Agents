@@ -12,14 +12,16 @@ Atiq Yaasir- 190375
 
 ## 1. Self-driving trailer as an intelligent agent
 ### 1.1 PEAS framework
+Here is a clean table with no added colours, ready to copy into Word or your Markdown file.
 
-| PEAS component | Design elements |Why |
-|---|---|---|
-| **Performance measures** | Safe arrival, shortest route distance, fuel efficiency, timely arrival | Success is not just reaching Kisumu: safety and fuel consumption should also be considered.. |
-| **Environment** | Roads, traffic, pedestrians, junctions, signs, roadworks, weather and towns on the route | The trailer operates in a changing physical road environment. |
-| **Actuators** | Steering, engine, brakes, indicators, lights,horn | They let the agent act on its environment. |
-| **Sensors** | GPS, cameras,speed sensors |These supply information about the trailer's surroundings. |
+| PEAS Component       | Design Elements                                                                           | Why                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Performance Measures | Safe arrival, shortest route distance, fuel efficiency, timely arrival                    | Success is not just reaching Kisumu; safety and fuel consumption should also be considered. |
+| Environment          | Roads, traffic, pedestrians, junctions, signs, roadworks, weather, and towns on the route | The trailer operates in a changing physical road environment.                               |
+| Actuators            | Steering, engine, brakes, indicators, lights, and horn                                    | They allow the agent to act on its environment.                                             |
+| Sensors              | GPS, cameras, and speed sensors                                                           | These supply information about the trailer's surroundings.                                  |
 
+Note: Markdown tables inherit their colours from the app or editor you use. If a row appears bluish, that's usually the editor's theme, not the Markdown itself.
 ### 1.2 Five environment classifications
 
 | | Classification | Reasoning |
