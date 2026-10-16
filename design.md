@@ -1,168 +1,122 @@
-# Groupwork  Practical Exercise 3: Designing a Searching Agent
+# Practical Exercise 3: Designing a Searching Agent
 
-
-
-Emmanuel Onyango- 191258  
- 
+Emmanuel Onyango - 191258  
 Rayvon Andeche - 190159  
+Austin Maina - 192076  
+Atiq Yaasir - 190375
 
-Austin Maina - 192076
+## 1. Self-driving trailer agent
 
-Atiq Yaasir- 190375
+### PEAS framework
 
-## 1. Self-driving trailer as an intelligent agent
-### 1.1 PEAS framework
-Here is a clean table with no added colours, ready to copy into Word or your Markdown file.
-
-| PEAS Component       | Design Elements                                                                           | Why                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Performance Measures | Safe arrival, shortest route distance, fuel efficiency, timely arrival                    | Success is not just reaching Kisumu; safety and fuel consumption should also be considered. |
-| Environment          | Roads, traffic, pedestrians, junctions, signs, roadworks, weather, and towns on the route | The trailer operates in a changing physical road environment.                               |
-| Actuators            | Steering, engine, brakes, indicators, lights, and horn                                    | They allow the agent to act on its environment.                                             |
-| Sensors              | GPS, cameras, and speed sensors                                                           | These supply information about the trailer's surroundings.                                  |
-
-
-### 1.2 Five environment classifications
-
-| | Classification | Reasoning |
-|---|---|---|
-| | Partially observable | Obstacles and road conditions can be hidden or outside sensor range. |
-|  | Stochastic | Other drivers, traffic and weather introduce uncertain outcomes. |
-|  | Sequential | Earlier driving and routing decisions influence later states. |
-|  | Dynamic | Road users and traffic conditions change during decision-making. |
-|  | Multiagent| Other vehicles and road users pursue own goals and compete for the road space
-
-
-## 2. Highway network: abstraction, directed graph and search tree
-
-### 2.1 Search problem formulation
-
-| Element | Definition |
+| Component | Description |
 |---|---|
-| Agent | Self-driving trailer |
-| Initial state | Nairobi |
-| Goal test | Current town is Kisumu |
-| States | Towns represented as nodes in the simplified network |
-| Actions | Travel along a modelled directed road edge to the next town |
-| Transition model | Move from town `u` to directly connected town `v` |
-| Path cost | Sum of road distances in kilometres along the route |
+| Performance measure | Deliver the cargo safely, follow traffic rules, minimise distance and fuel use, and arrive on time. |
+| Environment | Roads, towns, junctions, other vehicles, pedestrians, traffic signs, weather and roadworks. |
+| Actuators | Steering, accelerator, brakes, indicators, lights and horn. |
+| Sensors | GPS, cameras, radar, speed sensors and trailer load sensors. |
 
-### 2.2 Abstraction and assumptions
+### Five environment classifications
 
-In the model, each town is a node and each road connection is a directed edge, with the driving distance as its weight (never negative). We left out bends, junctions, acceleration and steering, since they don’t affect the route search. The graph only covers the three routes our group chose to compare, not every road in Kenya. Edges point from Nairobi towards Kisumu because that’s the direction we’re searching in. The roads themselves are still two-way.
+| Classification | Reason |
+|---|---|
+| Partially observable | The sensors cannot detect everything, such as a vehicle hidden around a bend. |
+| Stochastic | Other drivers and changing road conditions make outcomes uncertain. |
+| Sequential | A turn or lane change affects the trailer's later position and available actions. |
+| Dynamic | Traffic and pedestrians keep moving while the agent decides what to do. |
+| Multiagent | The trailer shares the road with drivers and pedestrians who have their own goals. |
 
+## 2. Directed graph and search tree
 
-### 2.3 Distance measurements
+The initial state is Nairobi and the goal state is Kisumu. Each state is a town, and an action means travelling along a road link to the next town. The path cost is the sum of the distances travelled in kilometres.
 
-| From | To | Distance (km) |
+We use the map in *Problem Solving Agents*, page 4. Nairobi is the starting region; Thika and Nyeri represent the Central Highlands; Naivasha, Nakuru, Nyahururu, Narok, Bomet and Kericho represent the Rift Valley; and Kisumu represents the Lake Victoria Basin.
+
+**Abstraction:** We keep the towns and road distances, leaving out individual bends, minor junctions and driving controls. The graph compares three routes from the class map. Arrows show the travel direction being considered; they do not mean the roads are one-way. Other roads are outside this simplified model.
+
+### Road distances
+
+These approximate road distances were checked on Google Maps on 16 October 2026. R1-R3 show the towns used as stops. We reuse one cost for each shared road link, so rounding and town entry/exit turns may cause small differences from Google's trip totals. We assume these roads are usable by the trailer.
+
+| From | To | Distance (km) | Source |
+|---|---|---:|---|
+| Nairobi | Naivasha | 92.8 | [R1](https://www.google.com/maps/dir/Nairobi/Naivasha/Nakuru/Kericho/Kisumu/) |
+| Naivasha | Nakuru | 70.5 | R1 |
+| Nakuru | Kericho | 107.0 | R1 |
+| Kericho | Kisumu | 84.0 | R1 |
+| Nairobi | Narok | 145.0 | [R2](https://www.google.com/maps/dir/Nairobi/Narok/Bomet/Kericho/Kisumu/) |
+| Narok | Bomet | 81.0 | R2 |
+| Bomet | Kericho | 76.1 | R2 |
+| Nairobi | Thika | 45.1 | [R3](https://www.google.com/maps/dir/Nairobi/Thika/Nyeri/Nyahururu/Nakuru/Kericho/Kisumu/) |
+| Thika | Nyeri | 113.0 | R3 |
+| Nyeri | Nyahururu | 104.0 | R3 |
+| Nyahururu | Nakuru | 63.5 | R3 |
+
+### Directed graph
+
+The numbers on the arrows are distances in kilometres.
+
+```mermaid
+flowchart TD
+    A[Nairobi] -->|92.8| B[Naivasha]
+    A -->|145.0| C[Narok]
+    A -->|45.1| D[Thika]
+    B -->|70.5| E[Nakuru]
+    C -->|81.0| F[Bomet]
+    D -->|113.0| G[Nyeri]
+    G -->|104.0| H[Nyahururu]
+    H -->|63.5| E
+    E -->|107.0| I[Kericho]
+    F -->|76.1| I
+    I -->|84.0| J[Kisumu]
+```
+
+### Search tree
+
+The number in brackets total distance from Nairobi. This shows the possible routes.
+
+```mermaid
+flowchart TD
+    A["Nairobi (0)"] --> B["Naivasha (92.8)"]
+    A --> C["Narok (145.0)"]
+    A --> D["Thika (45.1)"]
+    B --> E["Nakuru (163.3)"]
+    E --> F["Kericho (270.3)"]
+    F --> G["Kisumu (354.3)"]
+    C --> H["Bomet (226.0)"]
+    H --> I["Kericho (302.1)"]
+    I --> J["Kisumu (386.1)"]
+    D --> K["Nyeri (158.1)"]
+    K --> L["Nyahururu (262.1)"]
+    L --> M["Nakuru (325.6)"]
+    M --> N["Kericho (432.6)"]
+    N --> O["Kisumu (516.6)"]
+```
+
+## 3. Optimal path from Nairobi to Kisumu
+
+**Path cost = sum of the road distances between consecutive towns.**
+
+| Route | Calculation (km) | Total (km) |
 |---|---|---:|
-| Nairobi | Naivasha | 90 |
-| Naivasha | Nakuru | 71 |
-| Nakuru | Kericho | 108 |
-| Kericho | Kisumu | 84 |
-| Nairobi | Narok | 142 |
-| Narok | Bomet | 81 |
-| Bomet | Kericho | 79 |
-| Nairobi | Thika | 40 |
-| Thika | Nyeri | 110 |
-| Nyeri | Nyahururu | 103 |
-| Nyahururu | Nakuru | 75 |
+| Nairobi → Naivasha → Nakuru → Kericho → Kisumu | 92.8 + 70.5 + 107.0 + 84.0 | **354.3** |
+| Nairobi → Narok → Bomet → Kericho → Kisumu | 145.0 + 81.0 + 76.1 + 84.0 | 386.1 |
+| Nairobi → Thika → Nyeri → Nyahururu → Nakuru → Kericho → Kisumu | 45.1 + 113.0 + 104.0 + 63.5 + 107.0 + 84.0 | 516.6 |
 
+We use uniform-cost search (Dijkstra's algorithm), which expands the town with the lowest accumulated distance. At Kericho, it keeps the 270.3 km path through Nakuru instead of the 302.1 km path through Bomet. It also keeps the 163.3 km path to Nakuru through Naivasha instead of the 325.6 km path through Nyahururu. The search stops when Kisumu is selected from the frontier. With positive edge costs, this gives the shortest path in the graph.
 
-### 2.4 Weighted directed graph
+**Optimal path: Nairobi → Naivasha → Nakuru → Kericho → Kisumu.**  
+**Total distance: approximately 354.3 km.**
 
-```mermaid
-flowchart TD
-    A["Nairobi"] -->|"90 km"| B["Naivasha"]
-    A -->|"142 km"| C["Narok"]
-    A -->|"40 km"| D["Thika"]
-    B -->|"71 km"| E["Nakuru"]
-    C -->|"81 km"| F["Bomet"]
-    D -->|"110 km"| G["Nyeri"]
-    G -->|"103 km"| H["Nyahururu"]
-    H -->|"75 km"| E
-    E -->|"108 km"| I["Kericho"]
-    F -->|"79 km"| I
-    I -->|"84 km"| J["Kisumu"]
-```
+This is the shortest route in our simplified graph. The calculation minimises distance; it does not compare journey time or fuel use.
 
-### 2.5 Search tree of potential routes
+## References
 
-.
+- *Intelligent Agents*, class slides, pages 15 and 20-25.
+- *Problem Solving Agents*, class slides, pages 4-14.
+- [Google Maps class-map view](https://www.google.com/maps/@-0.6429168,35.8398069,9z).
+- Google Maps driving directions, R1-R3 in the distance table.
 
-```mermaid
-flowchart TD
-    A["Nairobi (0)"]
-    A -->|"90"| B["Naivasha (90)"]
-    A -->|"142"| C["Narok (142)"]
-    A -->|"40"| D["Thika (40)"]
-    B -->|"71"| E["Nakuru (161)"]
-    E -->|"108"| F["Kericho (269)"]
-    F -->|"84"| G["Kisumu (353)"]
-    C -->|"81"| H["Bomet (223)"]
-    H -->|"79"| I["Kericho (302)"]
-    I -->|"84"| J["Kisumu (386)"]
-    D -->|"110"| K["Nyeri (150)"]
-    K -->|"103"| L["Nyahururu (253)"]
-    L -->|"75"| M["Nakuru (328)"]
-    M -->|"108"| N["Kericho (436)"]
-    N -->|"84"| O["Kisumu (520)"]
-    style G fill:#bbf7d0,color:#14532d,stroke:#16a34a
-```
+## Group photo
 
-## 3. Finding the optimal path
-
-To determine the optimal path for the self-driving trailer from Nairobi to Kisumu, we evaluate the path cost function $g(n)$, defined as the total cumulative distance in km along each branch of the search tree.
-
-### 3.1 Path Evaluation Summary
-
-There are three main paths through the search tree:
-
-1. **Route 1 (Rift Valley via Naivasha):**
-   $$\text{Nairobi} \xrightarrow{90} \text{Naivasha} \xrightarrow{71}   \text{Nakuru} \xrightarrow{108} \text{Kericho} \xrightarrow{84} \text{Kisumu}$$
-   * **Total Distance:** $90 + 71 + 84 = \mathbf{353\text{ km}}$
-
-2. **Route 2 (Central Highlands via Thika):**
-   $$\text{Nairobi} \xrightarrow{40} \text{Thika} \xrightarrow{110} \text{Nyeri} \xrightarrow{103} \text{Nyahururu} \xrightarrow{75} \text{Nakuru} \xrightarrow{108} \text{Kericho} \xrightarrow{84} \text{Kisumu}$$
-   * **Total Distance:** $40 + 110 + 103 + 75 + 108 + 84 = \mathbf{520\text{ km}}$
-
-3. **Route 3 (South Rift via Narok):**
-   $$\text{Nairobi} \xrightarrow{142} \text{Narok} \xrightarrow{81} \text{Bomet} \xrightarrow{79} \text{Kericho} \xrightarrow{84} \text{Kisumu}$$
-   * **Total Distance:** $142 + 81 + 79 + 84 = \mathbf{386\text{ km}}$
-
-
-### 3.2 Algorithmic Proof via Dijkstra's Algorithm
-
-Comparing three hand-picked routes only tells us which of them is shortest. To be sure no cheaper path exists in our graph, we ran Dijkstra's algorithm, which is uniform-cost search: at each step, the agent expands the town with the smallest distance travelled so far. Think of a football team building an attack from the goalkeeper's goal kick. Instead of chasing the flashiest pass, they always work from the player the ball reached most cheaply, and only lock that player in once no faster route to them could exist. Each town carries a label d(v), the best distance found so far, and a pointer p(v), where we came from, so we can retrace the winning move at the end.
-#### Execution Trace Table
-
-| Iteration | Current Node Selected $u$ | $d(u)$ (km) | Updated Neighbors ($v$) | Tentative Distance $d(v)$ Formula                                                                          | Previous Node $p(v)$ | Unvisited Set $Q$ Remaining                                                           |
-|:---------:|:--------------------------|:-----------:|:------------------------|:-----------------------------------------------------------------------------------------------------------|:--------------------:|:--------------------------------------------------------------------------------------|
-|   **0**   | *Initialization*          |            |                        | $d(\text{Nairobi})=0$, all others $=\infty$                                                                |        `None`        | `{Nairobi, Thika, Naivasha, Narok, Nyeri, Nakuru, Bomet, Nyahururu, Kericho, Kisumu}` |
-|   **1**   | **Nairobi**               |      0      | Thika, Naivasha, Narok  | $d(\text{Thika}) = 0 + 40 = 40$<br>$d(\text{Naivasha}) = 0 + 90 = 90$<br>$d(\text{Narok}) = 0 + 142 = 142$ |       Nairobi        | `{Thika, Naivasha, Narok, Nyeri, Nakuru, Bomet, Nyahururu, Kericho, Kisumu}`          |
-|   **2**   | **Thika**                 |     40      | Nyeri                   | $d(\text{Nyeri}) = 40 + 110 = 150$                                                                         |        Thika         | `{Naivasha, Narok, Nyeri, Nakuru, Bomet, Nyahururu, Kericho, Kisumu}`                 |
-|   **3**   | **Naivasha**              |     90      | Nakuru                  | $d(\text{Nakuru}) = 90 + 71 = 161$                                                                         |       Naivasha       | `{Narok, Nyeri, Nakuru, Bomet, Nyahururu, Kericho, Kisumu}`                           |
-|   **4**   | **Narok**                 |     142     | Bomet                   | $d(\text{Bomet}) = 142 + 81 = 223$                                                                         |        Narok         | `{Nyeri, Nakuru, Bomet, Nyahururu, Kericho, Kisumu}`                                  |
-|   **5**   | **Nyeri**                 |     150     | Nyahururu               | $d(\text{Nyahururu}) = 150 + 103 = 253$                                                                    |        Nyeri         | `{Nakuru, Bomet, Nyahururu, Kericho, Kisumu}`                                         |
-|   **6**   | **Nakuru**                |     161     | Kericho                 | $d(\text{Kericho}) = 161 + 108 = 269$                                                                      |        Nakuru        | `{Bomet, Nyahururu, Kericho, Kisumu}`                                                 |
-|   **7**   | **Bomet**                 |     223     | Kericho                 | $223 + 79 = 302 > 269$ *(No change)*                                                                       |        Narok         | `{Nyahururu, Kericho, Kisumu}`                                                        |
-|   **8**   | **Nyahururu**             |     253     | Nakuru                  | $253 + 75 = 328 > 161$ *(No change)*                                                                       |        Nyeri         | `{Kericho, Kisumu}`                                                                   |
-|   **9**   | **Kericho**               |     269     | Kisumu                  | $d(\text{Kisumu}) = 269 + 84 = 353$                                                                        |       Kericho        | `{Kisumu}`                                                                            |
-|  **10**   | **Kisumu (Goal)**         |   **353**   |                        | **Goal Reached**                                                                                           |       Kericho        | `{}`                                                                                  |
-
-### 3.3 Backtracking & Final Path
-
-Tracing backward from the destination **Kisumu** using the predecessor pointer $p(v)$:
-$$\text{Kisumu} \longleftarrow \text{Kericho} \longleftarrow \text{Nakuru} \longleftarrow \text{Naivasha} \longleftarrow \text{Nairobi}$$
-
-Optimal path:
-$$\mathbf{\text{Nairobi} \longrightarrow \text{Naivasha} \longrightarrow \text{Nakuru} \longrightarrow \text{Kericho} \longrightarrow \text{Kisumu}}$$
-
-* **Minimum Path Cost:** $\mathbf{353\text{ km}}$
-* **Conclusion:** The Naivasha–Nakuru–Kericho route is optimal at 353 km. It is 33 km shorter than the Narok route (386 km) and 167 km shorter than the Thika route (520 km). This result optimises distance only. Fuel use, travel time and road conditions, which our PEAS performance measure also names, would need extra data to compare.
-
-
-## group photo
-<img width="940" height="349" alt="image" src="https://github.com/user-attachments/assets/bd7ee0aa-2e58-4d03-a843-08cfbdcd8552" />
-
-
+<img width="940" height="349" alt="Group photo" src="https://github.com/user-attachments/assets/bd7ee0aa-2e58-4d03-a843-08cfbdcd8552" />
